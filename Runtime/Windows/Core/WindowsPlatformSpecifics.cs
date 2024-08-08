@@ -111,7 +111,11 @@ namespace PlayEveryWare.EpicOnlineServices
         {
             string pluginPlatformPath =
 #if UNITY_64
+#if UNITY_EDITOR
+            "x64";
+#else
             "x86_64";
+#endif
 #else
             "x86";
 #endif
