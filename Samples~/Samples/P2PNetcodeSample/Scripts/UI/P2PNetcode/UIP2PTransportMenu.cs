@@ -20,19 +20,22 @@
 * SOFTWARE.
 */
 
-using System;
-using UnityEngine;
-using UnityEngine.EventSystems;
-using UnityEngine.UI;
-using Epic.OnlineServices;
-using Epic.OnlineServices.Presence;
-
-#if ENABLE_INPUT_SYSTEM
-using UnityEngine.InputSystem;
-#endif
-
 namespace PlayEveryWare.EpicOnlineServices.Samples.Network
 {
+    using System;
+    using UnityEngine;
+    using UnityEngine.EventSystems;
+    using UnityEngine.UI;
+
+#if !EOS_DISABLE
+    using Epic.OnlineServices;
+    using Epic.OnlineServices.Presence;
+#endif
+
+#if ENABLE_INPUT_SYSTEM
+    using UnityEngine.InputSystem;
+#endif
+
     using JsonUtility = PlayEveryWare.EpicOnlineServices.Utility.JsonUtility;
 
     public class P2PTransportPresenceData
@@ -48,7 +51,7 @@ namespace PlayEveryWare.EpicOnlineServices.Samples.Network
         }
     }
 
-    public class UIP2PTransportMenu : UIFriendInteractionSource, ISampleSceneUI
+    public class UIP2PTransportMenu : SampleMenuWithFriends
     {
         public UIFriendsMenu FriendUI;
         public GameObject PlayerNetworkPrefab;
@@ -64,7 +67,6 @@ namespace PlayEveryWare.EpicOnlineServices.Samples.Network
         private EOSTransportManager transportManager = null;
         private bool isHost = false;
         private bool isClient = false;
-        private bool uiDirty = false;
         private bool controllingCharacter = false;
 
         private ulong joinGameAcceptedNotifyHandle = 0;
@@ -85,7 +87,7 @@ namespace PlayEveryWare.EpicOnlineServices.Samples.Network
                 Gamepad.current?.bButton.wasPressedThisFrame == true;
         }
 
-        public void Update()
+        protected override void Update()
         {
             if (controllingCharacter)
             {
@@ -139,8 +141,9 @@ namespace PlayEveryWare.EpicOnlineServices.Samples.Network
             }
         }
 #else
-        public void Update()
+        protected override void Update()
         {
+            base.Update();
             if (controllingCharacter)
             {
                 if (Input.GetButtonDown("Cancel") || Input.GetButtonDown("Submit"))
@@ -259,6 +262,7 @@ namespace PlayEveryWare.EpicOnlineServices.Samples.Network
 
         public override void OnFriendInteractButtonClicked(FriendData friendData)
         {
+#if !EOS_DISABLE
             var joinInfo = JsonUtility.FromJson<P2PTransportPresenceData>(friendData.Presence.JoinInfo);
             if (joinInfo.IsValid())
             {
@@ -276,20 +280,12 @@ namespace PlayEveryWare.EpicOnlineServices.Samples.Network
             {
                 Debug.LogError("UIP2PTransportMenu (OnFriendInteractButtonClicked): invalid join info");
             }
-        }
-
-        public override bool IsDirty()
-        {
-            return uiDirty;
-        }
-
-        public override void ResetDirtyFlag()
-        {
-            uiDirty = false;
+#endif
         }
 
         public void StartHostOnClick()
         {
+#if !EOS_DISABLE
             if (isHost)
             {
                 Debug.LogError("UIP2PTransportMenu (StartHostOnClick): already hosting");
@@ -301,14 +297,16 @@ namespace PlayEveryWare.EpicOnlineServices.Samples.Network
                 isHost = true;
                 SetSessionUIActive(true);
                 SetJoinInfo(EOSManager.Instance.GetProductUserId());
-                uiDirty = true;
+                SetDirtyFlag();
             }
             else
             {
                 Debug.LogError("UIP2PTransportMenu (StartHostOnClick): failed to start host");
             }
+#endif
         }
 
+#if !EOS_DISABLE
         private void SetJoinInfo(ProductUserId serverUserId)
         {
             var joinData = new P2PTransportPresenceData()
@@ -321,6 +319,7 @@ namespace PlayEveryWare.EpicOnlineServices.Samples.Network
 
             EOSSessionsManager.SetJoinInfo(joinString);
         }
+#endif
 
         public void DisconnectOnClick()
         {
@@ -329,7 +328,7 @@ namespace PlayEveryWare.EpicOnlineServices.Samples.Network
             isClient = false;
             SetSessionUIActive(false);
             EOSSessionsManager.SetJoinInfo(null);
-            uiDirty = true;
+            SetDirtyFlag();
         }
 
         public void TakeControlOnClick()
@@ -375,6 +374,7 @@ namespace PlayEveryWare.EpicOnlineServices.Samples.Network
             }
         }
 
+#if !EOS_DISABLE
         private void OnJoinGameAccepted(ref JoinGameAcceptedCallbackInfo data)
         {
             var joinData = JsonUtility.FromJson<P2PTransportPresenceData>(data.JoinInfo);
@@ -388,6 +388,7 @@ namespace PlayEveryWare.EpicOnlineServices.Samples.Network
                 Debug.LogError("UIP2PTransportMenu (OnJoinGameAccepted): invalid join info");
             }
         }
+#endif
 
         private void OnDisconnect(ulong _)
         {
@@ -395,10 +396,11 @@ namespace PlayEveryWare.EpicOnlineServices.Samples.Network
             isClient = false;
             SetSessionUIActive(false);
             EOSSessionsManager.SetJoinInfo(null);
-            uiDirty = true;
+            SetDirtyFlag();
             NetworkSamplePlayer.UnregisterDisconnectCallback(OnDisconnect);
         }
 
+#if !EOS_DISABLE
         private void JoinGame(ProductUserId hostId)
         {
             if (hostId.IsValid())
@@ -410,7 +412,7 @@ namespace PlayEveryWare.EpicOnlineServices.Samples.Network
                     SetSessionUIActive(true);
                     isClient = true;
                     SetJoinInfo(hostId);
-                    uiDirty = true;
+                    SetDirtyFlag();
                 }
                 else
                 {
@@ -422,9 +424,11 @@ namespace PlayEveryWare.EpicOnlineServices.Samples.Network
                 Debug.LogError("UIP2PTransportMenu (JoinGame): invalid server user id");
             }
         }
+#endif
 
         private void AddJoinListener()
         {
+#if !EOS_DISABLE
             var presenceInterface = EOSManager.Instance.GetEOSPresenceInterface();
             if (presenceInterface == null)
             {
@@ -432,6 +436,7 @@ namespace PlayEveryWare.EpicOnlineServices.Samples.Network
             }
             var options = new AddNotifyJoinGameAcceptedOptions();
             joinGameAcceptedNotifyHandle = presenceInterface.AddNotifyJoinGameAccepted(ref options, null, OnJoinGameAccepted);
+#endif
         }
 
         private void RemoveJoinListener()
@@ -444,7 +449,7 @@ namespace PlayEveryWare.EpicOnlineServices.Samples.Network
             }
         }
 
-        public void HideMenu()
+        protected override void HideInternal()
         {
             if (isClient || isHost)
             {
@@ -462,7 +467,7 @@ namespace PlayEveryWare.EpicOnlineServices.Samples.Network
             RemoveJoinListener();
         }
 
-        public void ShowMenu()
+        protected override void ShowInternal()
         {
             Background.enabled = false;
 
@@ -471,11 +476,15 @@ namespace PlayEveryWare.EpicOnlineServices.Samples.Network
             AddJoinListener();
 
             NetworkSamplePlayer.DisplayNameContainer = DisplayNameContainer;
+
+#if !EOS_DISABLE
             NetworkSamplePlayer.DisplayNameSetter = SetDisplayNameText;
+#endif
         }
 
-        private void OnDestroy()
+        protected override void OnDestroy()
         {
+            base.OnDestroy();
             transportManager?.Disconnect();
 
             NetworkSamplePlayer.DisplayNameContainer = null;
@@ -483,6 +492,7 @@ namespace PlayEveryWare.EpicOnlineServices.Samples.Network
             NetworkSamplePlayer.DestoryNetworkManager();
         }
 
+#if !EOS_DISABLE
         private void SetDisplayNameText(Text displayNameUI, EpicAccountId userId)
         {
             var userInfoManager = EOSManager.Instance.GetOrCreateManager<EOSUserInfoManager>();
@@ -505,5 +515,6 @@ namespace PlayEveryWare.EpicOnlineServices.Samples.Network
                 });
             }
         }
+#endif
     }
 }

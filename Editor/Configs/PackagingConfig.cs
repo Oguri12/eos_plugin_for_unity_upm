@@ -20,12 +20,23 @@
  * SOFTWARE.
  */
 
+#if !EOS_DISABLE
+
 namespace PlayEveryWare.EpicOnlineServices.Editor.Config
 {
+    using System;
+
+    [Serializable]
+    [ConfigGroup("Packaging")]
     public class PackagingConfig : EditorConfig
     {
+        [DirectoryPathField("Custom Build Directory Path")]
         public string customBuildDirectoryPath;
+
+        [FilePathField("JSON Description Path", "json")]
         public string pathToJSONPackageDescription;
+
+        [DirectoryPathField("Output Path")]
         public string pathToOutput;
 
         static PackagingConfig()
@@ -36,3 +47,5 @@ namespace PlayEveryWare.EpicOnlineServices.Editor.Config
         protected PackagingConfig() : base("eos_plugin_packaging_config.json") { }
     }
 }
+
+#endif

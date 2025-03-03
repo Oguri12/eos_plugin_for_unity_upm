@@ -1,25 +1,26 @@
 /*
-* Copyright (c) 2024 PlayEveryWare
-* 
-* Permission is hereby granted, free of charge, to any person obtaining a copy
-* of this software and associated documentation files (the "Software"), to deal
-* in the Software without restriction, including without limitation the rights
-* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-* copies of the Software, and to permit persons to whom the Software is
-* furnished to do so, subject to the following conditions:
-* 
-* The above copyright notice and this permission notice shall be included in all
-* copies or substantial portions of the Software.
-* 
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-* LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-* OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-* SOFTWARE.
-*/
+ * Copyright (c) 2024 PlayEveryWare
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 
+#if !EOS_DISABLE
 
 using System.Collections;
 using System.Collections.Generic;
@@ -42,7 +43,7 @@ namespace PlayEveryWare.EpicOnlineServices.Editor.Utility
     // Helper to allow for StartCoroutine to be used from a static context
     public class CoroutineExecutor : MonoBehaviour { }
 
-    public static class UnityPackageCreationUtility
+    internal static class UnityPackageCreationUtility
     {
         /// <summary>
         /// Defines the different kinds of packages that can be created.
@@ -76,13 +77,13 @@ namespace PlayEveryWare.EpicOnlineServices.Editor.Utility
         /// </summary>
         public static CoroutineExecutor executorInstance;
         
-        public static async Task CreatePackage(PackageType packageType, bool clean = false, IProgress<FileUtility.CopyFileProgressInfo> progress = null, CancellationToken cancellationToken = default)
+        public static async Task CreatePackage(PackageType packageType, bool clean = false, IProgress<FileSystemUtility.CopyFileProgressInfo> progress = null, CancellationToken cancellationToken = default)
         {
             var packagingConfig = await Config.GetAsync<PackagingConfig>();
 
             if (clean)
             {
-	            FileUtility.CleanDirectory(packagingConfig.pathToOutput, true);
+	            FileSystemUtility.CleanDirectory(packagingConfig.pathToOutput, true);
             }
 
             switch (packageType)
@@ -102,7 +103,7 @@ namespace PlayEveryWare.EpicOnlineServices.Editor.Utility
             ValidatePackage(packagingConfig.pathToOutput);
         }
 
-        private static async Task CreateUPM(string outputPath, string json_file, IProgress<FileUtility.CopyFileProgressInfo> progress, CancellationToken cancellationToken)
+        private static async Task CreateUPM(string outputPath, string json_file, IProgress<FileSystemUtility.CopyFileProgressInfo> progress, CancellationToken cancellationToken)
         {
             /*
              * NOTES:
@@ -123,7 +124,7 @@ namespace PlayEveryWare.EpicOnlineServices.Editor.Utility
             PackageDescription packageDescription = JsonUtility.FromJsonFile<PackageDescription>(json_file);
 
             var filesToCopy = PackageFileUtility.FindPackageFiles(
-                FileUtility.GetProjectPath(),
+                FileSystemUtility.GetProjectPath(),
                 packageDescription
             );
 
@@ -131,9 +132,9 @@ namespace PlayEveryWare.EpicOnlineServices.Editor.Utility
         }
 
         private static async Task CreateUPMTarball(string outputPath, string json_file,
-            IProgress<FileUtility.CopyFileProgressInfo> progress, CancellationToken cancellationToken)
+            IProgress<FileSystemUtility.CopyFileProgressInfo> progress, CancellationToken cancellationToken)
         {
-            if (!FileUtility.TryGetTempDirectory(out string tempOutput))
+            if (!FileSystemUtility.TryGetTempDirectory(out string tempOutput))
             {
                 throw new BuildFailedException(
                     "Could not create temporary directory into which to place files for compression.");
@@ -167,7 +168,7 @@ namespace PlayEveryWare.EpicOnlineServices.Editor.Utility
         /// <param name="packagePath">Path to exported package.</param>
         private static void ValidatePackage(string packagePath)
         {
-            FileUtility.NormalizePath(ref packagePath);
+            FileSystemUtility.NormalizePath(ref packagePath);
 
             // Get all entries.
             var allEntries = Directory.GetFileSystemEntries(packagePath);
@@ -212,3 +213,5 @@ namespace PlayEveryWare.EpicOnlineServices.Editor.Utility
         }
     }
 }
+
+#endif

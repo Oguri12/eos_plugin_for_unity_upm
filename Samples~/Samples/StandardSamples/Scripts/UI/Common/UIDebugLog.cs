@@ -20,16 +20,15 @@
 * SOFTWARE.
 */
 
-using System;
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using UnityEngine.UI;
-using UnityEngine.EventSystems;
-using Epic.OnlineServices.Logging;
-
 namespace PlayEveryWare.EpicOnlineServices.Samples
 {
+    using System;
+    using System.Collections.Generic;
+    using UnityEngine;
+    using UnityEngine.UI;
+    using UnityEngine.EventSystems;
+    using Epic.OnlineServices.Logging;
+
     public class UIDebugLog : MonoBehaviour
     {
         [Header("Debug Log UI")]
@@ -40,6 +39,25 @@ namespace PlayEveryWare.EpicOnlineServices.Samples
         public ScrollRect ScrollRect;
 
         private Queue<string> logCacheList = new Queue<string>();
+
+        /// <summary>
+        /// The <see cref="UIDebugLogText"/> cannot generate a mesh that has more than "65000" vertices.
+        /// Particularly long logged messages can add up to past this value.
+        /// This would result in the log throwing an ArgumentException every time it is updated.
+        /// This value is an approximation of how long of a string a text element can hold.
+        /// </summary>
+        private const int MaximumLogStringLength = 10000;
+
+        /// <summary>
+        /// Indicates the total number of logs that can be in the cache.
+        /// </summary>
+        private const int MaximumLogsInCache = 100;
+
+        /// <summary>
+        /// Stores the current total string length of all the contents of the
+        /// log cache.
+        /// </summary>
+        private int _currentLogStringLength;
 
         private bool _dirty = false;
         private string logCache = string.Empty;
@@ -77,7 +95,8 @@ namespace PlayEveryWare.EpicOnlineServices.Samples
             logLevelMenuItems = new List<UIDebugLogLevelMenuItem>();
             BuildLogLevelMenu();
             ignoreLogLevelChange = false;
-            LogLevelScrollView.gameObject.SetActive(false);
+
+            LogLevelScrollView?.gameObject.SetActive(false);
         }
 
         public void OnScollDragBegin()
@@ -102,6 +121,11 @@ namespace PlayEveryWare.EpicOnlineServices.Samples
 
         private void BuildLogLevelMenu()
         {
+            if (LogLevelTemplate == null)
+            {
+                return;
+            }
+
             LogLevelTemplate.InitDropdown();
 
             allCategoriesMenuItem = CreateLogCategoryItem(LogCategory.AllCategories);
@@ -248,11 +272,28 @@ namespace PlayEveryWare.EpicOnlineServices.Samples
                 logEntry = "<color=" + color + ">" + logEntry + "</color>";
             }
 
+            // Add the length of the new log entry to the length of the total 
+            // log cache contents.
+            _currentLogStringLength += logEntry.Length;
+
+            // While there are items in the log cache list to remove, and while
+            // the current log string length is greater than the maximum string
+            // length allowed, remove items until the string length is within
+            // limits, or there are no more logs to remove from the cache.
+            while (logCacheList.Count != 0 && _currentLogStringLength > MaximumLogStringLength)
+            {
+                _currentLogStringLength -= logCacheList.Dequeue().Length;
+            }
+
+            // Add the new log entry to the cache list
             logCacheList.Enqueue(logEntry);
 
-            if(logCacheList.Count > 100)
+            // If the log cache list has more than the maximum items, than
+            // remove items from the cache and update the current log string
+            // length.
+            if (logCacheList.Count > MaximumLogsInCache)
             {
-                logCacheList.Dequeue();
+                _currentLogStringLength -= logCacheList.Dequeue().Length;
             }
 
             _dirty = true;
@@ -341,9 +382,20 @@ namespace PlayEveryWare.EpicOnlineServices.Samples
             }
 
             // FPS
-            deltaTime_FPS += (Time.deltaTime - deltaTime_FPS) * 0.1f;
-            float fps = 1.0f / deltaTime_FPS;
-            FPSValue.text = Mathf.Ceil(fps).ToString();
+            if (FPSValue != null)
+            {
+                deltaTime_FPS += (Time.deltaTime - deltaTime_FPS) * 0.1f;
+
+                if (deltaTime_FPS != 0)
+                {
+                    float fps = 1.0f / deltaTime_FPS;
+                    FPSValue.text = Mathf.Ceil(fps).ToString();
+                }
+                else
+                {
+                    FPSValue.text = nameof(float.NaN);
+                }
+            }
         }
 
         private void ScrollToBottom()

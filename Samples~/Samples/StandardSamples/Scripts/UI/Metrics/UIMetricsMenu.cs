@@ -20,18 +20,17 @@
 * SOFTWARE.
 */
 
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Text.RegularExpressions;
-using UnityEngine.UI;
-using UnityEngine;
-using Epic.OnlineServices;
-using Epic.OnlineServices.Metrics;
-
 namespace PlayEveryWare.EpicOnlineServices.Samples
 {
-    public class UIMetricsMenu : MonoBehaviour, ISampleSceneUI
+    using System;
+    using System.Collections.Generic;
+    using System.Text.RegularExpressions;
+    using UnityEngine.UI;
+    using UnityEngine;
+    using Epic.OnlineServices;
+    using Epic.OnlineServices.Metrics;
+
+    public class UIMetricsMenu : SampleMenu
     {
         public UIConsoleInputField DisplayNameVal;
         public Dropdown ControllerTypeDropdown;
@@ -41,19 +40,25 @@ namespace PlayEveryWare.EpicOnlineServices.Samples
         public Button BeginBtn;
         public Button EndBtn;
 
-        private Regex ipv4Validator;
-        private Regex ipv6Validator;
+        private readonly Regex _ipv4Validator = new("^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$");
+        private readonly Regex _ipv6Validator = new("(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))");
         private EOSMetricsManager MetricsManager;
         private EOSUserInfoManager UserInfoManager;
 
-        private void Awake()
-        {
-            ipv4Validator = new Regex("^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$");
-            ipv6Validator = new Regex("(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))");
-        }
+        private bool Initialized { get; set; } = false;
 
         private void Start()
         {
+            Initialize();
+        }
+
+        private void Initialize()
+        {
+            if (Initialized)
+            {
+                return;
+            }
+
             MetricsManager = EOSManager.Instance.GetOrCreateManager<EOSMetricsManager>();
             UserInfoManager = EOSManager.Instance.GetOrCreateManager<EOSUserInfoManager>();
 
@@ -67,10 +72,13 @@ namespace PlayEveryWare.EpicOnlineServices.Samples
 
             ErrorMessageTxt.gameObject.SetActive(false);
             UpdateButtons();
+
+            Initialized = true;
         }
 
-        private void OnDestroy()
+        protected override void OnDestroy()
         {
+            base.OnDestroy();
             EOSManager.Instance.RemoveManager<EOSMetricsManager>();
         }
 
@@ -84,7 +92,7 @@ namespace PlayEveryWare.EpicOnlineServices.Samples
             else
             {
                 ip = ip.Trim();
-                return ipv4Validator.IsMatch(ip) || ipv6Validator.IsMatch(ip);
+                return _ipv4Validator.IsMatch(ip) || _ipv6Validator.IsMatch(ip);
             }
         }
 
@@ -109,6 +117,12 @@ namespace PlayEveryWare.EpicOnlineServices.Samples
 
         private void UpdateButtons()
         {
+            // If this update was requested before the menu is set up, exit early
+            if (MetricsManager == null)
+            {
+                return;
+            }
+
             bool sessionActive = MetricsManager.IsSessionActive();
             BeginBtn.interactable = !sessionActive;
             EndBtn.interactable = sessionActive;
@@ -152,15 +166,15 @@ namespace PlayEveryWare.EpicOnlineServices.Samples
             UpdateButtons();
         }
 
-        public void HideMenu()
+        protected override void HideInternal()
         {
-            gameObject.SetActive(false);
             UpdateButtons();
         }
 
-        public void ShowMenu()
+        protected override void ShowInternal()
         {
-            gameObject.SetActive(true);
+            Initialize();
+
             var localUserInfo = UserInfoManager.GetLocalUserInfo();
             if (localUserInfo.UserId?.IsValid() == true)
             {

@@ -20,32 +20,30 @@
 * SOFTWARE.
 */
 
-using Epic.OnlineServices;
-using Epic.OnlineServices.Auth;
-using Epic.OnlineServices.UI;
-using Epic.OnlineServices.Ecom;
-using Epic.OnlineServices.Logging;
+namespace PlayEveryWare.EpicOnlineServices.Samples
+{
+    using Epic.OnlineServices;
+    using Epic.OnlineServices.Auth;
+    using Epic.OnlineServices.UI;
+    using Epic.OnlineServices.Ecom;
+    using Epic.OnlineServices.Logging;
 
-using System;
-using System.Collections;
-using System.Collections.Generic;
+    using System;
+    using System.Collections;
+    using System.Collections.Generic;
+    using System.Linq;
 
-using UnityEngine;
-using UnityEngine.Events;
-using UnityEngine.EventSystems;
-using UnityEngine.SceneManagement;
-using UnityEngine.UI;
+    using UnityEngine;
+    using UnityEngine.Events;
+    using UnityEngine.EventSystems;
+    using UnityEngine.SceneManagement;
+    using UnityEngine.UI;
 
 #if ENABLE_INPUT_SYSTEM
 using UnityEngine.InputSystem;
 #endif
 
-using PlayEveryWare.EpicOnlineServices;
-
-namespace PlayEveryWare.EpicOnlineServices.Samples
-{
-    using System.IO;
-    using System.Linq;
+    using PlayEveryWare.EpicOnlineServices;
 
     public class UILoginMenu : MonoBehaviour
     {
@@ -245,7 +243,7 @@ namespace PlayEveryWare.EpicOnlineServices.Samples
             // Check to make sure that the friendly name for the scene was found.
             if (string.IsNullOrEmpty(currentSceneFriendlyName))
             {
-                throw new InvalidDataException($"Cannot find friendly name for scene name \"{currentSceneName}\".");
+                throw new ArgumentException($"Cannot find friendly name for scene name \"{currentSceneName}\".");
             }
 
             // alphabetize the scene names.
@@ -689,11 +687,15 @@ namespace PlayEveryWare.EpicOnlineServices.Samples
             {
 
                 //case ExternalCredentialType.GogSessionTicket:
-                //case ExternalCredentialType.GoogleIdToken:
                 //case ExternalCredentialType.ItchioJwt:
                 //case ExternalCredentialType.ItchioKey:
                 //case ExternalCredentialType.AmazonAccessToken:
-
+#if !UNITY_ANDROID || UNITY_EDITOR
+                case ExternalCredentialType.GoogleIdToken:
+                    loginButton.interactable = false;
+                    loginButtonText.text = "Platform not supported.";
+                    break;
+#endif
 #if !(UNITY_STANDALONE)
                 case ExternalCredentialType.SteamSessionTicket:
                 case ExternalCredentialType.SteamAppTicket:
@@ -1076,7 +1078,7 @@ namespace PlayEveryWare.EpicOnlineServices.Samples
             {
                 EOSManager.Instance.StartLoginWithLoginTypeAndToken(loginType,
                                                                        null,
-                                                                       EOSManager.Instance.GetCommandLineArgsFromEpicLauncher().authPassword,
+                                                                       EOSManager.EOSSingleton.GetCommandLineArgsFromEpicLauncher().authPassword,
                                                                        StartLoginWithLoginTypeAndTokenCallback);
             }
             else
@@ -1095,6 +1097,10 @@ namespace PlayEveryWare.EpicOnlineServices.Samples
         {
             switch (externalType)
             {
+                case ExternalCredentialType.GoogleIdToken:
+                    ConnectGoogleId();
+                    break;
+
                 case ExternalCredentialType.SteamSessionTicket:
                     ConnectSteamSessionTicket();
                     break;
@@ -1173,6 +1179,22 @@ namespace PlayEveryWare.EpicOnlineServices.Samples
             }
         }
 
+        private void ConnectGoogleId()
+        {
+            SignInWithGoogleManager signInWithGoogleManager = new();
+
+            signInWithGoogleManager.GetGoogleIdToken((string token, string username) => 
+            {
+                if (string.IsNullOrEmpty(token))
+                {
+                    Debug.LogError("Failed to retrieve Google Id Token");
+                    return;
+                }
+
+                StartConnectLoginWithToken(ExternalCredentialType.GoogleIdToken, token, username);
+            });
+        }
+
         private void ConnectAppleId()
         {
             signInWithAppleManager = new Apple.EOSSignInWithAppleManager();
@@ -1193,20 +1215,7 @@ namespace PlayEveryWare.EpicOnlineServices.Samples
                 return;
             }
 
-            Discord.DiscordManager.Instance.RequestOAuth2Token(OnDiscordAuthReceived);
-        }
-
-        private void OnDiscordAuthReceived(string token)
-        {
-            if (token == null)
-            {
-                Debug.LogError("Connect Login failed: Unable to get Discord OAuth2 token");
-                ConfigureUIForLogin();
-            }
-            else
-            {
-                EOSManager.Instance.StartConnectLoginWithOptions(ExternalCredentialType.DiscordAccessToken, token, onloginCallback: ConnectLoginTokenCallback);
-            }
+            Discord.DiscordManager.Instance.StartConnectLogin(ConnectLoginTokenCallback);
         }
 
         private void ConnectOpenId()
@@ -1218,27 +1227,14 @@ namespace PlayEveryWare.EpicOnlineServices.Samples
                 string password = tokenParts[1].Trim();
                 if (!string.IsNullOrEmpty(username) && !string.IsNullOrEmpty(password))
                 {
-                    OpenId.OpenIdRequestManager.Instance.RequestToken(username, password, OnOpenIdTokenReceived);
+                    OpenId.OpenIdRequestManager.Instance.StartConnectLoginWithOpenID(username, password, ConnectLoginTokenCallback);
+                    
                     return;
                 }
             }
 
             Debug.LogError("Connect Login failed: OpenID credentials should be entered as \"username:password\"");
             ConfigureUIForLogin();
-        }
-
-        private void OnOpenIdTokenReceived(string username, string token)
-        {
-            if (token == null)
-            {
-                Debug.LogError("Connect Login failed: Unable to acquire OpenID token");
-                ConfigureUIForLogin();
-            }
-            else
-            {
-                EOSManager.Instance.StartConnectLoginWithOptions(ExternalCredentialType.OpenidAccessToken, token, onloginCallback: ConnectLoginTokenCallback);
-            }
-
         }
 
         private void ConnectOculus()

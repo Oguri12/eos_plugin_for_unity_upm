@@ -22,31 +22,63 @@
 
 namespace PlayEveryWare.EpicOnlineServices.Editor
 {
+    using System;
     using System.Threading.Tasks;
 
-    // Interface for allowing adding additional config files to the Config editor
-    public interface IConfigEditor
+    /// <summary>
+    /// Interface for allowing adding additional config files to the Config
+    /// editor.
+    /// </summary>
+    public interface IConfigEditor : IDisposable
     {
         /// <summary>
-        /// Returns the human-readable labelText for the section of configuration.
+        /// Returns the human-readable labelText for the section of
+        /// configuration.
         /// </summary>
-        /// <returns>String representing the section this config controls.</returns>
+        /// <returns>
+        /// String representing the section this config controls.
+        /// </returns>
         string GetLabelText();
 
         /// <summary>
-        /// Loads the config values from disk.
+        /// Expands the ConfigEditor.
         /// </summary>
-        Task Load();
+        public void Expand();
 
         /// <summary>
-        /// Saves the configuration to disk.
+        /// Collapses the ConfigEditor.
         /// </summary>
-        /// <param name="prettyPrint">Whether or not to format the JSON in a more human-readable manner.</param>
-        Task Save(bool prettyPrint = true);
+        public void Collapse();
+
+        /// <summary>
+        /// Loads the config values from disk asynchronously.
+        /// </summary>
+        Task LoadAsync();
+
+        /// <summary>
+        /// Loads the config values from disk synchronously.
+        /// </summary>
+        void Load();
+
+        /// <summary>
+        /// Saves the configuration to disk synchronously.
+        /// </summary>
+        /// <param name="prettyPrint">
+        /// Whether to format the JSON in a more human-readable manner.
+        /// </param>
+        void Save(bool prettyPrint = true);
+
+        /// <summary>
+        /// Saves the configuration to disk asynchronously.
+        /// </summary>
+        /// <param name="prettyPrint">
+        /// Whether or not to format the JSON in a more human-readable manner.
+        /// </param>
+        Task SaveAsync(bool prettyPrint = true);
 
         /// <summary>
         /// Render the editor for the configuration values.
         /// </summary>
-        Task Render();
+        Task RenderAsync();
     }
 }

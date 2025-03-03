@@ -56,7 +56,7 @@ namespace PlayEveryWare.EpicOnlineServices
         [DllImport("UnityHelpers_Android")]
         private static extern JavaVM UnityHelpers_GetJavaVM();
 
-        public AndroidPlatformSpecifics() : base(PlatformManager.Platform.Android, ".so") { }
+        public AndroidPlatformSpecifics() : base(PlatformManager.Platform.Android) { }
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
         static public void Register()
@@ -87,10 +87,10 @@ namespace PlayEveryWare.EpicOnlineServices
         // This does some work to configure the Android side of things before doing the
         // 'normal' EOS init things.
         // TODO: Configure the internal and external directory
-        public override void ConfigureSystemInitOptions(ref EOSInitializeOptions initializeOptionsRef, EOSConfig configData)
+        public override void ConfigureSystemInitOptions(ref EOSInitializeOptions initializeOptionsRef)
         {
             // Do the standard overriding stuff
-            base.ConfigureSystemInitOptions(ref initializeOptionsRef, configData);
+            base.ConfigureSystemInitOptions(ref initializeOptionsRef);
 
             // check again for if it's null after coming out of the base ConfigureSystemInitOptions method
             // (it shouldn't, but check anyways to make compile-time checks happy)
@@ -109,7 +109,7 @@ namespace PlayEveryWare.EpicOnlineServices
 
         //-------------------------------------------------------------------------
         [Conditional("ENABLE_DEBUG_EOSMANAGERANDROID")]
-        static void print(string toPrint)
+        static void Log(string toPrint)
         {
             UnityEngine.Debug.Log(toPrint);
         }

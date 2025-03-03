@@ -20,11 +20,13 @@
  * SOFTWARE.
  */
 
+#if !EOS_DISABLE
+
 // TODO: Make sure to enclose this properly in scripting defines so that it is only enabled for Windows platforms.
 //       Alternatively, implement it so that it behaves as expected on a Linux machine (ie running the Makefile
 //       natively.
 
-namespace PlayEveryWare.EpicOnlineServices.Build
+namespace PlayEveryWare.EpicOnlineServices.Editor.Build
 {
     using PlayEveryWare.EpicOnlineServices.Utility;
     using System;
@@ -738,7 +740,7 @@ namespace PlayEveryWare.EpicOnlineServices.Build
         /// <returns>The path to the temporary directory in which to store the files temporarily.</returns>
         private static string CacheExistingBinaries(IEnumerable<string> files)
         {
-            if (!FileUtility.TryGetTempDirectory(out string temporaryDirectory))
+            if (!FileSystemUtility.TryGetTempDirectory(out string temporaryDirectory))
             {
                 Debug.LogWarning("Could not create temporary directory to cache existing binaries.");
                 return string.Empty;
@@ -779,3 +781,5 @@ namespace PlayEveryWare.EpicOnlineServices.Build
 
     }
 }
+
+#endif

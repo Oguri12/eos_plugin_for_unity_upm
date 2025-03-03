@@ -21,7 +21,7 @@
  */
 
 #if !EOS_DISABLE
-#if !UNITY_EDITOR
+#if !UNITY_EDITOR && !EXTERNAL_TO_UNITY
 using UnityEngine.Scripting;
 [assembly: AlwaysLinkAssembly]
 #endif
@@ -29,11 +29,14 @@ namespace PlayEveryWare.EpicOnlineServices
 {
     using System;
     using System.Collections.Generic;
-    using System.IO;
+
+    // The EXTERNAL_TO_UNITY block is here to enable the compilation of this
+    // code file outside of the context of Unity altogether.
+#if !EXTERNAL_TO_UNITY
     using UnityEngine;
-    using UnityEngine.Scripting;
-    using Utility;
-    using JsonUtility = PlayEveryWare.EpicOnlineServices.Utility.JsonUtility;
+#endif
+
+    using JsonUtility = Utility.JsonUtility;
 
     public abstract class PlatformSpecifics<T> : IPlatformSpecifics where T : PlatformConfig
     {
@@ -41,10 +44,9 @@ namespace PlayEveryWare.EpicOnlineServices
 
         #region Methods for which the functionality is shared (consider these "sealed")
 
-        protected PlatformSpecifics(PlatformManager.Platform platform, string dynamicLibraryExtension)
+        protected PlatformSpecifics(PlatformManager.Platform platform)
         {
-            this.Platform = platform;
-            PlatformManager.SetPlatformDetails(platform, typeof(T), dynamicLibraryExtension);
+            Platform = platform;
         }
 
         public string GetDynamicLibraryExtension()
@@ -53,7 +55,7 @@ namespace PlayEveryWare.EpicOnlineServices
         }
 
         #endregion
-        
+
         #region Virtual methods that have a default behavior, but may need to be overwritten by deriving classes.
 
         public virtual string GetTempDir()
@@ -61,10 +63,14 @@ namespace PlayEveryWare.EpicOnlineServices
             return Application.temporaryCachePath;
         }
 
+        // The EXTERNAL_TO_UNITY block is here to enable the compilation of this
+        // code file outside of the context of Unity altogether.
+#if !EXTERNAL_TO_UNITY
         public virtual void InitializeOverlay(IEOSCoroutineOwner owner)
         {
             // default behavior is to take no action.
         }
+#endif
 
         public virtual void AddPluginSearchPaths(ref List<string> pluginPaths)
         {
@@ -92,39 +98,20 @@ namespace PlayEveryWare.EpicOnlineServices
             // this might be different on future platforms.
             return false;
         }
+
         public virtual void ConfigureSystemPlatformCreateOptions(ref EOSCreateOptions createOptions)
         {
             ((EOSCreateOptions)createOptions).options.RTCOptions = new();
         }
 
-        public virtual void ConfigureSystemInitOptions(ref EOSInitializeOptions initializeOptionsRef,
-            EOSConfig configData)
+        // The EXTERNAL_TO_UNITY block is here to enable the compilation of this
+        // code file outside of the context of Unity altogether.
+#if !EXTERNAL_TO_UNITY
+        public virtual void ConfigureSystemInitOptions(ref EOSInitializeOptions initializeOptionsRef)
         {
-            Debug.Log("ConfigureSystemInitOptions");
-
-            if (initializeOptionsRef is not EOSInitializeOptions initializeOptions)
-            {
-                throw new Exception("ConfigureSystemInitOptions: initializeOptions is null!");
-            }
-
-            string configPath = PlatformManager.GetConfigFilePath(Platform);
-            
-            T config = JsonUtility.FromJsonFile<T>(configPath);
-
-            if (config != null && initializeOptions.options.OverrideThreadAffinity.HasValue)
-            {
-                Debug.Log($"Assigning thread affinity override values for platform \"{Platform}\".");
-                var overrideThreadAffinity = initializeOptions.options.OverrideThreadAffinity.Value;
-                overrideThreadAffinity.NetworkWork = config.overrideValues.GetThreadAffinityNetworkWork(overrideThreadAffinity.NetworkWork);
-                overrideThreadAffinity.StorageIo = config.overrideValues.GetThreadAffinityStorageIO(overrideThreadAffinity.StorageIo);
-                overrideThreadAffinity.WebSocketIo = config.overrideValues.GetThreadAffinityWebSocketIO(overrideThreadAffinity.WebSocketIo);
-                overrideThreadAffinity.P2PIo = config.overrideValues.GetThreadAffinityP2PIO(overrideThreadAffinity.P2PIo);
-                overrideThreadAffinity.HttpRequestIo = config.overrideValues.GetThreadAffinityHTTPRequestIO(overrideThreadAffinity.HttpRequestIo);
-                overrideThreadAffinity.RTCIo = config.overrideValues.GetThreadAffinityRTCIO(overrideThreadAffinity.RTCIo);
-                initializeOptions.options.OverrideThreadAffinity = overrideThreadAffinity;
-            }
+            // Default implementation is to do nothing
         }
-
+#endif
         /// <summary>
         /// Indicates whether the platform is ready for network activity.
         /// TODO: Determine where this is used, and why it isn't a boolean.

@@ -1,4 +1,4 @@
-<a href="http://playeveryware.com"><img src="/docs/images/PlayEveryWareLogo.gif" alt="Lobby Screenshot" width="10%"/></a>
+<a href="http://playeveryware.com"><img src="/com.playeveryware.eos/Documentation~/images/PlayEveryWareLogo.gif" alt="Lobby Screenshot" width="10%"/></a>
 
 # <div align="center">Command-line Export of Plugin</div>
 ---
@@ -7,7 +7,7 @@ This document outlines how to export the plugin from source using a command line
 
 ## BuildPackage
 
-The following command generates a new `com.playeveryware.eos-[VERSION].tgz` file at the indicated output directory, the same exact way it would if you created a package via Unity Editor `Tools -> EOS Plugin -> Create Package` (and subsequently pressed "Create UPM Package"):
+The following command generates a new `com.playeveryware.eos-[VERSION].tgz` file at the indicated output directory, the same exact way it would if you created a package via Unity Editor `EOS Plugin -> Advanced -> Create Package` (and subsequently pressed "Create UPM Package"):
 
 ```
 Unity.exe -batchMode \

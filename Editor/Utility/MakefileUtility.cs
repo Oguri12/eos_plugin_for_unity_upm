@@ -1,36 +1,36 @@
 /*
-* Copyright (c) 2024 PlayEveryWare
-* 
-* Permission is hereby granted, free of charge, to any person obtaining a copy
-* of this software and associated documentation files (the "Software"), to deal
-* in the Software without restriction, including without limitation the rights
-* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-* copies of the Software, and to permit persons to whom the Software is
-* furnished to do so, subject to the following conditions:
-* 
-* The above copyright notice and this permission notice shall be included in all
-* copies or substantial portions of the Software.
-* 
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-* LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-* OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-* SOFTWARE.
-*/
+ * Copyright (c) 2024 PlayEveryWare
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 
-using UnityEngine;
-using UnityEditor;
-using System.IO;
-using System.Text.RegularExpressions;
+#if !EOS_DISABLE
 
 namespace PlayEveryWare.EpicOnlineServices.Editor.Build
 {
     using Config;
-    using EpicOnlineServices.Build;
     using System.Threading.Tasks;
     using Config = EpicOnlineServices.Config;
+    using UnityEngine;
+    using UnityEditor;
+    using System.IO;
+    using System.Text.RegularExpressions;
 
     [InitializeOnLoad]
     public static partial class MakefileUtility
@@ -44,7 +44,7 @@ namespace PlayEveryWare.EpicOnlineServices.Editor.Build
             ErrorRegex = new Regex(@"error [a-zA-z0-9]*:", RegexOptions.IgnoreCase);
         }
 
-        [MenuItem("Tools/EOS Plugin/Build Libraries/Win32")]
+        [MenuItem("EOS Plugin/Advanced/Build Libraries/Win32")]
         public static void BuildLibrariesWin32()
         {
 #if UNITY_EDITOR_WIN
@@ -52,7 +52,7 @@ namespace PlayEveryWare.EpicOnlineServices.Editor.Build
 #endif
         }
 
-        [MenuItem("Tools/EOS Plugin/Build Libraries/Win64")]
+        [MenuItem("EOS Plugin/Advanced/Build Libraries/Win64")]
         public static void BuildLibrariesWin64()
         {
 #if UNITY_EDITOR_WIN
@@ -60,8 +60,8 @@ namespace PlayEveryWare.EpicOnlineServices.Editor.Build
 #endif
         }
 
-        [MenuItem("Tools/EOS Plugin/Build Libraries/Win32", true)]
-        [MenuItem("Tools/EOS Plugin/Build Libraries/Win64", true)]
+        [MenuItem("EOS Plugin/Advanced/Build Libraries/Win32", true)]
+        [MenuItem("EOS Plugin/Advanced/Build Libraries/Win64", true)]
         public static bool CanBuildLibrariesWindows()
         {
 #if UNITY_EDITOR_WIN
@@ -71,7 +71,7 @@ namespace PlayEveryWare.EpicOnlineServices.Editor.Build
 #endif
         }
 
-        [MenuItem("Tools/EOS Plugin/Build Libraries/Mac")]
+        [MenuItem("EOS Plugin/Advanced/Build Libraries/Mac")]
         public static void BuildLibrariesMac()
         {
 #if UNITY_EDITOR_OSX
@@ -79,7 +79,7 @@ namespace PlayEveryWare.EpicOnlineServices.Editor.Build
 #endif
         }
 
-        [MenuItem("Tools/EOS Plugin/Build Libraries/Mac", true)]
+        [MenuItem("EOS Plugin/Advanced/Build Libraries/Mac", true)]
         public static bool CanBuildLibrariesMac()
         {
 #if UNITY_EDITOR_OSX
@@ -89,7 +89,7 @@ namespace PlayEveryWare.EpicOnlineServices.Editor.Build
 #endif
         }
 
-        [MenuItem("Tools/EOS Plugin/Build Libraries/Linux")]
+        [MenuItem("EOS Plugin/Advanced/Build Libraries/Linux")]
         public static void BuildLibrariesLinux()
         {
 #if UNITY_EDITOR_LINUX
@@ -97,7 +97,7 @@ namespace PlayEveryWare.EpicOnlineServices.Editor.Build
 #endif
         }
 
-        [MenuItem("Tools/EOS Plugin/Build Libraries/Linux", true)]
+        [MenuItem("EOS Plugin/Advanced/Build Libraries/Linux", true)]
         public static bool CanBuildLibrariesLinux()
         {
 #if UNITY_EDITOR_LINUX
@@ -205,3 +205,5 @@ namespace PlayEveryWare.EpicOnlineServices.Editor.Build
         }
     }
 }
+
+#endif

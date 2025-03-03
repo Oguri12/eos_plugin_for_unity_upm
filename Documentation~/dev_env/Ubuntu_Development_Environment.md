@@ -1,4 +1,4 @@
-<a href="/README.md"><img src="/docs/images/PlayEveryWareLogo.gif" alt="README.md" width="5%"/></a>
+<a href="/com.playeveryware.eos/README.md"><img src="/com.playeveryware.eos/Documentation~/images/PlayEveryWareLogo.gif" alt="README.md" width="5%"/></a>
 
 # <div align="center">Configuring Ubuntu 18.04 for development</div>
 ---
@@ -9,7 +9,7 @@ This is the second part of the guide for using Hyper-V to set up a Linux environ
 
 ## Setup your Linux Guest VM in Hyper-V
 
-If you want to set up your linux environment inside a virtual machine, and have not yet done so, follow [this](/docs/dev_env/HyperV_Linux_Guest_VM.md) guide first.
+If you want to set up your linux environment inside a virtual machine, and have not yet done so, follow [this](/com.playeveryware.eos/Documentation~/dev_env/HyperV_Linux_Guest_VM.md) guide first.
 
 ## Setting up your Linux Environment:
 
@@ -95,7 +95,7 @@ Once Unity is open:
 1. Go to File ➝ Build Settings
 2. Switch the platform to "Dedicated Server."
 3. Click on the button labeled "Player Settings..." at the bottom left.
-4. Go to Tools ➝ EOS Automated Test Settings
+4. Go to EOS Plugin ➝ Advanced ➝ EOS Automated Test Settings
 5. Select the previously created `Builds/Server` directory for the "Test Server Directory" field.
 
 ## Help! I ran out of disk space!
@@ -104,15 +104,15 @@ If you are using Hyper-V, and failed to increase the size of the disk before ins
 
 1. In Hyper-V, edit the virtual machine and navigate to "Hard Drive"
     
-    ![](/docs/images/ubuntu_dev_env/vm-settings.png)
+    ![](/com.playeveryware.eos/Documentation~/images/ubuntu_dev_env/vm-settings.png)
 
 2. Select "Edit"
 
-    ![](/docs/images/ubuntu_dev_env/edit-disk.png)
+    ![](/com.playeveryware.eos/Documentation~/images/ubuntu_dev_env/edit-disk.png)
 
 1. If "Edit" is greyed out, you will need to disable Checkpoints. Navigate to Checkpoints and unselect the checkbox that says "Enable checkpoints"
 
-    ![](/docs/images/ubuntu_dev_env/disable-checkpoints.png)
+    ![](/com.playeveryware.eos/Documentation~/images/ubuntu_dev_env/disable-checkpoints.png)
 
 3. The edit window will ask you to locate the disk. This should already be filled out. Select "Next"
 4. Choose "Expand"

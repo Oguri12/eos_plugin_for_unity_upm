@@ -1,24 +1,26 @@
 ﻿/*
-* Copyright (c) 2024 PlayEveryWare
-* 
-* Permission is hereby granted, free of charge, to any person obtaining a copy
-* of this software and associated documentation files (the "Software"), to deal
-* in the Software without restriction, including without limitation the rights
-* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-* copies of the Software, and to permit persons to whom the Software is
-* furnished to do so, subject to the following conditions:
-* 
-* The above copyright notice and this permission notice shall be included in all
-* copies or substantial portions of the Software.
-* 
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-* LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-* OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-* SOFTWARE.
-*/
+ * Copyright (c) 2024 PlayEveryWare
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
+#if !EOS_DISABLE
 
 using System.Collections.Generic;
 using UnityEngine;
@@ -37,6 +39,7 @@ namespace PlayEveryWare.EpicOnlineServices.Editor.Windows
     public class InstallEOSZipWindow : EOSEditorWindow
     {
         private const string PlatformImportInfoListFileName = "eos_platform_import_info_list.json";
+        public InstallEOSZipWindow() : base("Install EOS Zip") { }
 
         [Serializable]
         private class PlatformImportInfo
@@ -65,10 +68,10 @@ namespace PlayEveryWare.EpicOnlineServices.Editor.Windows
         private string pathToImportDescDirectory;
         private PlatformImportInfoList importInfoList;
 
-        [MenuItem("Tools/EOS Plugin/Install EOS zip")]
+        [MenuItem("EOS Plugin/Advanced/Install EOS zip")]
         public static void ShowWindow()
         {
-            GetWindow<InstallEOSZipWindow>("Install EOS Zip");
+            GetWindow<InstallEOSZipWindow>();
         }
 
         static public void UnzipEntry(ZipArchiveEntry zipEntry, string pathName)
@@ -125,7 +128,7 @@ namespace PlayEveryWare.EpicOnlineServices.Editor.Windows
 
         protected override void Setup()
         {
-            pathToImportDescDirectory = Path.Combine(FileUtility.GetProjectPath(), "etc/EOSImportDesriptions");
+            pathToImportDescDirectory = Path.Combine(FileSystemUtility.GetProjectPath(), "etc/EOSImportDesriptions");
             importInfoList = JsonUtility.FromJsonFile<PlatformImportInfoList>(Path.Combine(pathToImportDescDirectory, PlatformImportInfoListFileName));
         }
 
@@ -207,7 +210,7 @@ namespace PlayEveryWare.EpicOnlineServices.Editor.Windows
             GUILayout.Label(pathToZipFile);
             GUILayout.EndHorizontal();
 
-            if (GUILayout.Button("Install") && FileUtility.TryGetTempDirectory(out string tmpDir))
+            if (GUILayout.Button("Install") && FileSystemUtility.TryGetTempDirectory(out string tmpDir))
             {
                 try
                 {
@@ -228,7 +231,7 @@ namespace PlayEveryWare.EpicOnlineServices.Editor.Windows
                         var entity = toConvert[i];
                         EditorUtility.DisplayProgressBar("Converting line endings", Path.GetFileName(entity),
                             (float)i / toConvert.Count);
-                        FileUtility.ConvertDosToUnixLineEndings(entity);
+                        FileSystemUtility.ConvertDosToUnixLineEndings(entity);
                     }
 
                     EditorUtility.ClearProgressBar();
@@ -238,7 +241,7 @@ namespace PlayEveryWare.EpicOnlineServices.Editor.Windows
                     {
                         if (platformImportInfo.isGettingImported)
                         {
-                            string path = pathToImportDescDirectory + platformImportInfo.descPath;
+                            string path = Path.Combine(pathToImportDescDirectory, platformImportInfo.descPath);
                             var packageDescription =
                                 JsonUtility.FromJsonFile<PackageDescription>(path);
 
@@ -246,9 +249,9 @@ namespace PlayEveryWare.EpicOnlineServices.Editor.Windows
                                 PackageFileUtility.FindPackageFiles(tmpDir,
                                     packageDescription);
                             // This should be the correct directory
-                            var projectDir = FileUtility.GetProjectPath();
+                            var projectDir = FileSystemUtility.GetProjectPath();
                             // TODO: Async not tested here.
-                            PackageFileUtility.CopyFilesToDirectory(projectDir, fileResults).Wait();
+                            _ = PackageFileUtility.CopyFilesToDirectory(projectDir, fileResults);
                         }
                     }
 
@@ -263,3 +266,5 @@ namespace PlayEveryWare.EpicOnlineServices.Editor.Windows
         }
     }
 }
+
+#endif

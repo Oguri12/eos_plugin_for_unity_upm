@@ -1,13 +1,18 @@
 {
     "name": "com.playeveryware.eos",
-    "version": "3.3.1",
+    "version": "4.0.0",
     "unity": "2021.3",
-    "unityRelease": "8f1",
+    "unityRelease": "16f1",
+    "author": {
+        "name": "PlayEveryWare, Inc.",
+        "email": "eos-support@playeveryware.com",
+        "url": "https://playeveryware.com"
+    },
     "displayName": "Epic Online Services Plugin for Unity",
-    "description": "Friendly Plugin for Epic Online Services\n Unity 2021.3.8f1\n EOS SDK 1.16.3\n\n Dependencies for Extra Packs:\n P2P Netcode Sample : [com.unity.netcode.gameobjects] \n Performance Stress Test Sample : [com.unity.postprocessing]",
+    "description": "Friendly Plugin for Epic Online Services\n Unity 2021.3.16f1\n EOS SDK 1.17.0\n\n Dependencies for Extra Packs:\n P2P Netcode Sample : [com.unity.netcode.gameobjects] \n Performance Stress Test Sample : [com.unity.postprocessing]",
     "documentationUrl": "https://eospluginforunity.playeveryware.com",
     "dependencies": {
-        "com.unity.modules.jsonserialize": "1.0.0",
+        "com.unity.nuget.newtonsoft-json": "3.0.2",
         "com.unity.editorcoroutines": "1.0.0"
     },
     "keywords": [
@@ -31,6 +36,6 @@
         }
     ],
     "com_playeveryware": {
-        "git_build_sha": "9b9229325c93dd7e81461fde387ed5ef012349ec"
+        "git_build_sha": "a362a9dac1798b1b59d447f6911dda0210e7ebb6"
     }
 }

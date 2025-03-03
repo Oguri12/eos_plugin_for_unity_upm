@@ -1,24 +1,26 @@
 /*
-* Copyright (c) 2021 PlayEveryWare
-* 
-* Permission is hereby granted, free of charge, to any person obtaining a copy
-* of this software and associated documentation files (the "Software"), to deal
-* in the Software without restriction, including without limitation the rights
-* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-* copies of the Software, and to permit persons to whom the Software is
-* furnished to do so, subject to the following conditions:
-* 
-* The above copyright notice and this permission notice shall be included in all
-* copies or substantial portions of the Software.
-* 
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-* LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-* OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-* SOFTWARE.
-*/
+ * Copyright (c) 2021 PlayEveryWare
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
+#if !EOS_DISABLE
 
 using UnityEngine;
 using UnityEditor;
@@ -60,6 +62,8 @@ namespace PlayEveryWare.EpicOnlineServices.Editor.Windows
         
         private bool _operationInProgress;
 
+        public CreatePackageWindow() : base("Create Package") { }
+
         #region Progress Bar Stuff
         
         private float _actualProgress;
@@ -70,10 +74,10 @@ namespace PlayEveryWare.EpicOnlineServices.Editor.Windows
 
         #endregion
 
-        [MenuItem("Tools/EOS Plugin/Create Package")]
+        [MenuItem("EOS Plugin/Advanced/Create Package")]
         public static void ShowWindow()
         {
-            GetWindow<CreatePackageWindow>("Create Package");
+            GetWindow<CreatePackageWindow>();
         }
 
         protected override async Task AsyncSetup()
@@ -83,7 +87,7 @@ namespace PlayEveryWare.EpicOnlineServices.Editor.Windows
             if (string.IsNullOrEmpty(_packagingConfig.pathToJSONPackageDescription))
             {
                 _packagingConfig.pathToJSONPackageDescription =
-                    Path.Combine(FileUtility.GetProjectPath(), DefaultPackageDescription);
+                    Path.Combine(FileSystemUtility.GetProjectPath(), DefaultPackageDescription);
                 await _packagingConfig.WriteAsync();
             }
             await base.AsyncSetup();
@@ -93,7 +97,7 @@ namespace PlayEveryWare.EpicOnlineServices.Editor.Windows
         {
             string selectedPath = EditorUtility.OpenFolderPanel(
                 "Pick output directory",
-                Path.GetDirectoryName(FileUtility.GetProjectPath()),
+                Path.GetDirectoryName(FileSystemUtility.GetProjectPath()),
                 "");
 
             if (string.IsNullOrEmpty(selectedPath) || !Directory.Exists(selectedPath))
@@ -141,7 +145,7 @@ namespace PlayEveryWare.EpicOnlineServices.Editor.Windows
 
             GUILayout.Space(10f);
 
-            GUIEditorUtility.RenderFoldout(ref _showAdvanced, "Hide Advanced Options", "Show Advanced Options", RenderAdvanced);
+            _showAdvanced = GUIEditorUtility.RenderFoldout(_showAdvanced, "Hide Advanced Options", "Show Advanced Options", RenderAdvanced);
 
             GUILayout.Space(10f);
 
@@ -222,7 +226,7 @@ namespace PlayEveryWare.EpicOnlineServices.Editor.Windows
                     _actualProgress = 0.0f;
                     _progressText = "";
                     _createPackageCancellationTokenSource?.Cancel();
-                    FileUtility.CleanDirectory(_packagingConfig.pathToOutput);
+                    FileSystemUtility.CleanDirectory(_packagingConfig.pathToOutput);
                 }
                 GUILayout.EndVertical();
             }
@@ -254,7 +258,7 @@ namespace PlayEveryWare.EpicOnlineServices.Editor.Windows
             {
                 var jsonFile = EditorUtility.OpenFilePanel(
                     "Pick JSON Package Description",
-                    Path.Combine(FileUtility.GetProjectPath(), Path.GetDirectoryName(DefaultPackageDescription)),
+                    Path.Combine(FileSystemUtility.GetProjectPath(), Path.GetDirectoryName(DefaultPackageDescription)),
                     "json");
 
                 if (!string.IsNullOrWhiteSpace(jsonFile))
@@ -267,7 +271,7 @@ namespace PlayEveryWare.EpicOnlineServices.Editor.Windows
             if (jsonPackageFile != _packagingConfig.pathToJSONPackageDescription)
             {
                 _packagingConfig.pathToJSONPackageDescription = jsonPackageFile;
-                _packagingConfig.Write(true, false);
+                _packagingConfig.Write(true);
             }
 
             GUIEditorUtility.AssigningBoolField("Clean target directory", ref _cleanBeforeCreate, 150f,
@@ -309,7 +313,7 @@ namespace PlayEveryWare.EpicOnlineServices.Editor.Windows
                 _progressUpdateThread = new Thread(() => SmoothingDelay(_createPackageCancellationTokenSource.Token));
                 _progressUpdateThread.Start();
 
-                var progressHandler = new Progress<FileUtility.CopyFileProgressInfo>(value =>
+                var progressHandler = new Progress<FileSystemUtility.CopyFileProgressInfo>(value =>
                 {
                     var fileCountStrSize = value.TotalFilesToCopy.ToString().Length;
                     string filesCopiedStrFormat = "{0," + fileCountStrSize + "}";
@@ -341,7 +345,7 @@ namespace PlayEveryWare.EpicOnlineServices.Editor.Windows
                 if (EditorUtility.DisplayDialog("Package Created", "Package was successfully created",
                         "Open Output Path", "Close"))
                 {
-                    FileUtility.OpenDirectory(outputPath);
+                    FileSystemUtility.OpenDirectory(outputPath);
                 }
             }
             catch (OperationCanceledException ex)
@@ -360,3 +364,5 @@ namespace PlayEveryWare.EpicOnlineServices.Editor.Windows
         }
     }
 }
+
+#endif

@@ -2,7 +2,248 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-# Changelog
+## [4.0.0] - 2025-02-13
+
+### Changed
+
+- Update to EOS SDK 1.17.0
+
+## [3.3.6] - 2025-02-03
+
+### Added
+
+- feat: Enable display and edit of encryption key for client credentials.
+
+### Fixed
+
+- fix: Allow enum values to be cast to eitehr highest or lowest value. Correct implementation to default to 0 if there is no named value in range.
+
+## [3.3.5] - 2025-01-23
+
+## Changelog
+
+### Changed
+- **Configuration System Overhaul**  
+  - The plugin now uses a new configuration system, moving away from the older `EOSConfig` in favor of `ProductConfig` and multiple `PlatformConfig` files.  
+  - Marked `EOSConfig` as obsolete and introduced better default and migration paths for platform-specific settings.  
+  - Refactored large portions of the native code into clearer modules (`Config`, `PlatformManager`, `SteamConfig`, etc.), reducing duplication and improving maintainability.  
+  - Upgraded to Visual Studio 2022 for building native binaries.
+
+- **Editor & Build Process Improvements**  
+  - Refined editor windows and build scripts to better handle new config files and to auto-select defaults for newly defined platforms.  
+  - Moved many internal extension/helper classes into a “Common” area to simplify namespace usage and reduce redundancy.  
+  - Improved logging structure and behavior (including concurrency handling) in native and managed code.  
+  - Updated Unity package definitions and reorganized project files for more consistent UPM compatibility.
+
+### Added
+- **Managed & Native Bridge Utilities**  
+  - New `ManagedToUnmanagedBridge` library to facilitate deeper integration between managed C# code and native C++ components.  
+  - Introduced a `ConsoleApplication` project in the native solution, used for testing or demonstrating plugin behavior outside of Unity.
+
+- **Configuration Lifecycle Hooks & Auto-Selection**  
+  - Added a `BeforeWrite` hook in `ProductConfig` (and corresponding override logic) so the first sandbox and deployments can be automatically associated.  
+  - New “auto selection” features for client credentials, deployments, and platform defaults, improving the “first time user” experience for new projects.  
+  - Implemented `OnWriteCompleted` overrides in `ProductConfig` to reflect platform config changes immediately in the editor UI.
+
+- **Quality-of-Life Features**  
+  - Added support for additional platforms (e.g., `StandaloneOSX`) and integrated missing platform checks in the plugin’s internal platform manager.  
+  - Included new null-safe logic and fallback calls for Steam integration (e.g., retry with `SteamAPI_Init` if `SteamAPI_InitSafe` fails).  
+  - Enhanced doc tooling, including link-checking scripts and improved project documentation.
+
+### Fixed
+- **Command-Line & Credential Handling**  
+  - Corrected the implementation of command-line arguments passed from the Epic Games Launcher to ensure proper usage in native code.  
+  - Fixed null-check logic in client credential handling—particularly around newly introduced auto-selection paths and default deployments.
+
+- **Concurrency & Race Condition Bugs**  
+  - Addressed competing file read/write issues in editor windows by consolidating asynchronous calls and removing race conditions.  
+  - Removed or tightened up redundant `using` statements, compile conditionals, and shared references that led to sporadic compile or runtime warnings.
+
+- **Various Stability & Compatibility Issues**  
+  - Resolved lingering null-safety bugs (thread affinity, achievements, presence checks) throughout the plugin.  
+  - Fixed or removed outdated references to older configuration files (`EpicOnlineServicesConfig.json`), ensuring the new configuration paths are used cleanly.  
+  - Eliminated memory-leak and dangling-pointer issues in native code related to steam integration and the new config approach.
+
+## [3.3.4] - 2024-11-26
+
+### Changed
+
+- Update to EOS SDK 1.14.3.
+
+### Added
+
+- feat: EOSManager can have UserLoginInfo Provided to it
+- feat: Authentication Listener knows the difference between a Connect and Auth login
+
+### Fixed
+
+- fix: Add isolated changes that address the Android thread IO issue.
+- fix: Correct usage of FileSystemUtility in the IOSBuilder.
+
+## [3.3.3] - 2024-09-19
+
+### Added
+  - Added new unit test documentation and expanded test coverage across the project. (#914, #905, #893, #fdd07613, #0f55d1ec, #902)
+  - Improved documentation clarity and organization, including replacing markdown files in the root of the repository with symbolic links to the package files. (#914, #f9d3615a, #8685cd73, #f077cec1)
+  - Added new unit tests and refactored existing ones to address file upload encoding issues and improve coverage. (#f0b3572e, #902, #94eb0453, #f0b3572e)
+
+### Fixed
+  - Removed unreferenced and outdated prefabs and files, updated documentation to reference the correct prefabs. (#adfb2877, #bfbec067, #f077cec1, #f9d3615a)
+  - Renamed and reorganized unit tests to improve consistency in naming and structure. (#53bfb04a, #c8f4b821, #948babd5)
+  - Updated the `GetBuildTools` function to accommodate Android Build Tool versioning in Unity 2022.3.44f1 LTS. (#8ed407cf, #bc075e7e)
+  - Refactored managers into services, removed outdated manager references, and updated namespaces. (#2060ce08, #e83deb7f, #57b7b8b6, #561534d5)
+  - Removed extraneous files like `.editorconfig` and unreferenced classes. Fixed small issues like grammar and unused code. (#116f51c7, #84b67848, #adfb2877, #e3c7262a, #c799fcc1)
+
+## [3.3.2] - 2024-08-27
+
+### Added
+
+- feature (sessions): Reworking Sample, P2P Communication Part
+- feature(network): Implementing taskNetworkTimeoutSeconds
+- feat: Make the EOSSettingsWindow aware of which build targets are available, showing platform-specific options for only those that are.
+- feat: Implement function to enumerate the platforms that can be built against.
+- feat: Add function to generate a RuntimeConfig struct from the values of an EOSConfig class.
+- feat: Add RuntimeConfig struct that stores the totality of the configurable properties used by the plugin during runtime. Also add method to EnumUtility that supports decomposing a bitwise-operator combined enum value into it's constituent discrete components.
+- feat: Add upm layout as upm to asset project
+- feat: Upgrade targetted version of Unity.
+- feat: Add ability configure the plugin to not unload the EOS SDK on shutdown.
+- feat(sample,session): Major Session sample rework
+- tests: Add unit tests for enum extensions.
+- tests: Add unit tests of limited scope.
+- tests(sessions): Create and search for sessions
+- tests(login): Testing scene for auditing logins
+
+### Changed
+
+- chore(tool,import) : dispose result of async task to prevent warnings
+- chore(lib,android) : remove unused android libs
+- chore(sdk) : updated managed source for 1.16.3 hotfix
+- chore (documentation, Lobby): Adding clarifying documentation mentioning subscription
+- chore: add additional commenting
+- refactor(sessions): Capitalizing action that is a property
+- refactor(sessions): Some additional comment cleaning
+- refactor(sessions): Prefab instance link fix for friendsTabUI
+- refactor(session): Remove vestigial invite, fix ui to update properly first call
+- refactor(sessions): Juggling joined session better
+- refactor(sessions): Join session after search without member variable
+- refactor(sessions): All callers to AcknowledgeEventId cleaned up
+- refactor(sessions): AcknowledgeEventId takes in UIEventId argument
+- refactor(sessions): Rename to OnFriendStateChanged
+- refactor(sessions): MarkFriendsUIDirty => SetDirtyFlag
+- refactor(sessions): Rename UIOnPresenceAffectingChange to OnPresenceChange
+- refactor(sessions): `ownInvitationState` -> `OwnInvitationState`
+- refactor(friends ui): Standardized parent handling dirty status instead of implementors
+- refactor(sessions): Friend UI Refreshes
+- refactor(sessions): Basic Session Invitation for Presence Sessions
+- refactor(sessions): Added Friends UI to Sessions Scene
+- refactor(sessions): Addressing code review feedback
+- refactor(sessions): Session State Management
+- refactor(eos_sdk): Move eos_sdk to new upm layout directory
+- refactor: switch to static bool to test if EOSManager should unload EOS SDK or not.
+- refactor: remove `LoadDelegatesWithReflection` `LoadDelegatesByHand`
+
+### Fixed
+
+- fix(log,config) : Using default log levels if config file doesn't exist
+- fix(fileIO) : remove redundant code
+- fix(native,windows) : rebuild win32 versions to remain in sync with win64
+- fix(native,config) : Correct log config reader to use Pascal case
+- fix(android,fileIO) : remove file check that prevent file reading on android
+- fix(log,config) : fix renamed/capitalized config entries
+- fix(tool,import) : prevent the editor from being stuck forever after finishing the copy
+- fix(import) : updated description according to upm folder migration
+- fix: resolve empty asmdef file warning via dummy file.
+- fix: Add author details to package.json file.
+- fix: Correct minor issue within eos package description where the proper meta files were not being copied correctly.
+- fix: Add empty .gitignore files to Editor and Images directories, in-order to prevent Unity from trying to delete the associated meta files.
+- fix(mac,eac) : modify the execution bit for mac anticheat integrity tool
+- fix(eac,mac) : Mac EAC Settings template
+- fix: Correct references to version of unity that is supported.
+- fix: Change file select extension to asterisk.
+- fix(sample,achievement): General fixes on achievement scene
+- fix(eac,tool) : Allow anticheat integrity tool file path to recognize executables with no extension
+- fix(service,achievement) : prevent error when fetching product user ID prematurely
+- fix: Correct implementation of ConfigEditor so that it can be defaulted to open and work correctly within the EOSUnitTestSettingsWindow.
+- fix: Do not set the selected item during each Update(), as doing so makes it impossible for anything but the UIFirstSelected object to have focus.
+- fix: Change implementation of EOSFileTransfer to have size properly set so determination of size is not dependent on the contents of the Data byte array.
+- fix: Made leaderboard menu hidden, change to have SAMPLE_MENU_DEBUG off by default.
+- fix(eosmanager): Manage application shutdown only on Application.quitting
+- fix: Correct the implementation of the SetSelected function within SampleMenu to properly determine and set the focused control in the menu.
+- fix: Correct implementation of the function that gets the icon texture, by making sure that things are appropriately awaited.
+- fix: Corrected implementation of the get and cache data function within AchievementsService.
+- fix: Change UICustomInvitesMenu OnEnable function to actually be Awake.
+- fix: Change get achievement icon texture to return null on failure, and log a warning in all circumstances of failure.
+- fix: Ensure that the base implementation of the 'Hide()' function is called first thing.
+- fix: Utilize built-in log function instead.
+- fix: Change EOSService to have a default parameter value for the constructor.
+- fix: Return EOSSessionsManager to implement the IEOSSubManager interface.
+- fix: Fix implementations for logging out and logging in for eos services.
+- fix: Change implementation to override and call base implementations for Show/Hide.
+- fix: Correct icon loading logic for achievements to better support async.
+- fix: Change to use events instead of lists of delegate instances.
+- fix: Add proxy call from Hide/Show to call InternalHide/InternalShow.
+- fix: Moved various field members for UIParent into base class SampleMenu field member 'UIParent.'
+- fix: Move functionality within Start to properly be within the InternalAwake function for UIStoreMenu.
+- fix: Update UISessionsMatchmakingMenu to properly hide and/or show when needed.
+- fix: Move implementation of awake to base implementation.
+- fix: Remove Awake implementation from UITitleStorageMenu, depending instead upon the base implementation of Awake().
+- fix: Fold InternalUpdate behavior into base class implementation.
+- fix: Move UIFirstSelected to base class.
+- fix: Transition to using ISampleMenu as an abstract base class.
+- fix: Make the RuntimeConfig a readonly struct.
+- fix(eos,disable) : missing EOS_DISABLEs for newly added function calls or files
+- fix(test,discord) : disable discord within functions on unsupported platforms
+- fix: Place const declaration within proper compiler conditional branch so that it does not trigger a warning about an unused variable.
+- fix: Remove obsolete flag from flags field member of SteamConfig.
+- fix: Remove bootstrappy config parameters from runtimeconfig.
+- fix: Remove unused 'using' statements.
+- fix: Add check within ConfigEditor to make sure that Button config fields are only applied to field members of type Action.
+- fix: Populate steamApiInterfaceVersionsArray regardless of the success or failure of the parsing of the version.
+- fix: Remove field member from EOSSettingsWindow for the SteamConfig file, and any places within that class that reference it.
+- fix: Make field member that was errantly public private.
+- fix: Restore implementation of SteamManager to what it was before.
+- fix: Remove unused code paths.
+- fix: Further improvements to the user interface for changing EOS Plugin settings.
+- fix(android): Remove config data parameter from configuresystemoptions
+- fix: remove extra 'gc' from path for the EOS SDK in package description
+- fix: Update input rendering for SteamConfig to put it into the proper editor window.
+- fix: Move SteamConfig to Assets/Plugins/Source/Editor/Configs/ directory.
+- fix: Rename SteamWorks_Utility to SteamWorksUtility in keeping with the naming conventions used within the project.
+- fix(authentication): Theoretical OpenId re-authorization
+- fix(authentication): Authentication Tests
+- fix(discord): Retry auth on failure
+- fix(steam): Steam App and Session authentication re-attempts authentication if token is expired
+- fix(Discord): Refresh token is utilized when re-authing
+- fix(tests): OnShutdown during TearDown
+- fix: Consolidate test functionality of client sessions tests.
+- fix: Properly organize tests into mirrored namespace, resolve issues that caused tests to fail (yay! tests helped!)
+- fix: Add to gitignore to avoid init scene being added.
+- fix: Correct the function used to convert byte array to string by providing the start index and the number of bytes to read.
+- fix: Change function signature in EnumUtility to 'GetEnumerator'.
+- fix: Re-disable the new runtime config via scripting defines.
+- fix: Connect IntegratedPlatformManagementFlags field member to the RuntimeConfig data structure.
+- fix(network): Explicit double value as 0.0, Settings debug logs warning when string is invalid
+- fix (sessions): Non-Owners of Sessions Cannot Manage State
+- fix: Change SandboxId to be string instead of Guid.
+- fix: Move conversion from EOSConfig to RuntimeConfig from within EOSConfig to being an implicit conversion operator within RuntimeConfig.
+- fix: Correct order of parsing operations.
+- fix: Correct strings for descriptions of the flag values.
+- fix: Remove unreferenced code path and member within PlatformConfig.
+- fix: Correct signature used for configuring the override thread affinity values.
+- fix: Re-introduce public methods to EOSManager that were removed.
+- fix: Remove unused function that Loads EOSConfig into memory.
+- fix: Correct scripting defines to support the EOS_DISABLE flag.
+- fix: Move functionality to parse and validate Enum string flags to dedicated place for such tasks.
+- fix: Move SafeTranslatorUtility to Core (from Editor) to fit with new asmdef files surrounding test assemblies.
+- fix (sessions): Non-Owners of Sessions Cannot Manage State
+- fix: Rename window and config, move both to appropriate place within the editor assembly.
+- fix: Rename unit test configuration window for clarity, and disabled access to the unit test results parser.
+- fix: add discard to render async call.
+- fix: Add Serializable attribute to PackagingConfig class.
+- fix: Remove call to set the window title for PluginVersionWindow, as it is explicitly set during the render content step.
+- fix: Move DLL signing utility stuff into SigningUtility, remove SigningConfigEditor, after adding RenderInput support for List<string>
+- fix(connect,apple) : correct modified class names, and remove unwanted MonoBehaviour
+- fix (EOSManager): Don't use authToken if it is null
 
 ## [3.3.1] - 2024-07-30
 

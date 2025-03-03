@@ -20,7 +20,9 @@
  * SOFTWARE.
  */
 
-namespace PlayEveryWare.EpicOnlineServices.Build
+#if !EOS_DISABLE
+
+namespace PlayEveryWare.EpicOnlineServices.Editor.Build
 {
     using System.IO;
     using UnityEditor;
@@ -40,3 +42,5 @@ namespace PlayEveryWare.EpicOnlineServices.Build
         }
     }
 }
+
+#endif
